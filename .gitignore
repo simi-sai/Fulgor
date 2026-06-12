@@ -4,3 +4,12 @@
 
 # Python
 *__pycache__/
+
+# VIVADO
+*.cache
+*.hbs
+*.hw
+*.ip_user_files
+*.runs
+*.sim
+*.xpr
