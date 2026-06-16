@@ -3,7 +3,7 @@
 Laboratorios desarrollados durante el curso de Diseño Digital en FPGA impartido por Fundación Fulgor.
 
 - **Placa:** Arty A7 (Artix-7 FPGA)
-- **IDE:** AMD Vivado™ Design Suite 2025.1
+- **IDE:** AMD Vivado™ Design Suite 2024.2
 
 ## Laboratorios
 
