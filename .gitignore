@@ -13,3 +13,5 @@
 *.runs
 *.sim
 *.xpr
+*.dcp
+*bd/
