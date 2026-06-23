@@ -15,3 +15,7 @@
 *.xpr
 *.dcp
 *bd/
+
+# Documents
+*Consigna.pdf
+*Consignas.pdf
