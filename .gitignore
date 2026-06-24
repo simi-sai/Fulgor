@@ -15,6 +15,7 @@
 *.xpr
 *.dcp
 *bd/
+*.out
 
 # Documents
 *Consigna.pdf
