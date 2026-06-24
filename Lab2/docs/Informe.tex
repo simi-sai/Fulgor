@@ -80,7 +80,7 @@
         \textbf{Autor:} Simón Saillen
 
         \Large
-        \textbf{Profesores:} Ariel Pola, Agustin Pesce
+        \textbf{Profesores:} Ariel Pola, Agustin Pesce, Pablo Cayuela, Paul Romero, Santiago Garaventta Pascual
 
         \vspace{0.5cm}
 
@@ -94,13 +94,118 @@
 
 \section{Introducción}
 
+Este informe tiene como objetivo documentar el desarrollo de un proyecto de
+diseño digital utilizando Verilog. El proyecto se centra en la implementación
+de un módulo TOP que integra los módulos VIO e ILA para control y depuración.
+Se busca validar el comportamiento del diseño mediante un testbench y realizar
+la implementación en una FPGA, conectándose remotamente a la placa.
+
 \section{Objetivos}
+
+\begin{itemize}
+    \item Incluir los módulos VIO e ILA para control y debug del módulo TOP.\@
+    \item Realizar un testbench que valide el comportamiento del diseño sin los IP cores
+          VIO e ILA.\@
+    \item Implementar en FPGA conectándose remotamente a la placa.
+    \item Realizar capturas de pantalla que muestren las waveforms del Testbench e ILA.\@
+\end{itemize}
 
 \section{Desarrollo}
 
 \subsection{Material proporcionado}
 
+Se proporcionaron cinco archivos base:
+
+\begin{itemize}
+    \item \texttt{shiftleds.v}: El modulo TOP que implementa una salida de leds ciclica.
+    \item \texttt{shiftleds\_muxVioIla.v}: El mismo modulo TOP con los modulos VIO e ILA integrados.
+    \item \texttt{tb\_shiftleds\_file.v}: Testbench para el modulo TOP sin los modulos VIO e ILA.\@
+    \item \texttt{Arty\_Master\_v2.xdc}: Archivo de constrains para los pines de la FPGA.\@
+    \item \texttt{make\_tb\_files.py}: Script para generar los vectores de entrada para el testbench.
+\end{itemize}
+
+Los mismos fueron renombrados, cambiados y adaptados para mejor legibilidad y
+para cumplir con los objetivos del trabajo práctico.
+
+\subsection{Modificaciones realizadas}
+
+\subsubsection{Módulo TOP.v}
+
+Se unificaron los archivos \texttt{shiftleds.v} y
+\texttt{shiftleds\_muxVioIla.v} a \texttt{TOP.v} para tener un solo módulo que
+pueda ser simulado y sintetizado.
+
+Se agregaron las instancias de los modulos VIO e ILA al final del archivo, y se
+agregaron los puertos de entrada y salida necesarios para controlar los modulos
+VIO e ILA desde el testbench.
+
+Algunos nombres de señales fueron cambiados para mejorar la legibilidad del
+código.
+
+\subsubsection{Testbench tb\_TOP.v}
+
+Se renombró el archivo \texttt{tb\_shiftleds\_file.v} a \texttt{tb\_TOP.v}.
+
+Sin modificar el modulo TOP, se cambió el parámetro del testbench
+\texttt{NB\_COUNT} de 32 a 16, al hacer este cambio la cantidad necesaria de
+ciclos para superar el primer limite \texttt{R0} pasa de $2^{22}$ a $2^{6}$,
+permitiendo shifteos de registro mas seguidos y logrando una mejor observación
+del comportamiento.
+
+Se modifico el path de los archivos para ser leidos desde la ubicacion del
+testbench. Algunos nombres de señales fueron cambiados para mejorar la
+legibilidad del código.
+
+\subsubsection{Generador de Vectores make\_tb\_files.py}
+
+El script \texttt{make\_file.py} fue renombrado a \texttt{make\_tb\_files.py} y
+modificado para generar los archivos de entrada en la ubicacion del script.
+
+Se corrigio un error en la generacion del archivo \texttt{reset.out} que hacia
+que el reset este siempre activo, impidiendo que el contador del modulo TOP
+pueda avanzar, ahora solo se activa un ciclo de reloj cada vez que se cambia el
+valor de \texttt{switch[3:0]} en el testbench, a excepcion del penultimo cambio
+de valor, donde se inhabilita el \texttt{init} para mantener el valor de salida
+de los leds previo al cambio, se omite el reset para observar la conservacion
+del ultimo valor del contador.
+
 \section{Resultados}
+
+\subsection{Simulacion}
+
+Antes de modificar la cantidad de bits del contador, se realizó la simulación
+del testbench \texttt{tb\_TOP.v} y se obtuvieron las siguientes waveforms:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../images/tb_waveform_default.png}
+    \caption{Simulación del testbench tb\_TOP.v con contador de 32 bits.}
+\end{figure}
+
+Como se puede observar, el contador no logra superar el primer limite,
+manteniendo el valor de salida de los leds en \texttt{4'b0001} de manera
+constante. Pero se puede comprobar que el color del led si cambia al cambiar el
+valor de \texttt{switch[3]} a \texttt{1}.
+
+Una vez modificado el parámetro del contador a 16 bits, se realizó nuevamente
+la simulación del testbench \texttt{tb\_TOP.v} y se obtuvieron las siguientes
+waveforms:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../images/tb_waveform_16bits.png}
+    \caption{Simulación del testbench tb\_TOP.v con contador de 16 bits.}
+\end{figure}
+
+Como se puede observar, el contador logra superar los distintos limites,
+cambiando el valor de salida de los leds de manera cíclica. Ademas, se puede
+observar el cambio de velocidad del ciclo de los leds al cambiar el valor de
+\texttt{switch[2:0]}. Y por último, se puede observar que al cambiar el valor
+de \texttt{switch[0]} a \texttt{0}, se inhabilita el \texttt{init}, impidiendo
+que el contador pueda avanzar y manteniendo el valor de salida previo de los
+leds.
+
+\subsection{Implementación en FPGA}
 
 \section{Conclusiones}
 
