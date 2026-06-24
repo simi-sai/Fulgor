@@ -80,7 +80,7 @@
         \textbf{Autor:} Simón Saillen
 
         \Large
-        \textbf{Profesores:} Ariel Pola, Agustin Pesce, Pablo Cayuela, Paul Romero, Santiago Garaventta Pascual
+        \textbf{Profesores:} Ariel Luis Pola, Agustin Pesce, Pablo Cayuela, Paul Romero, Santiago Garaventta Pascual
 
         \vspace{0.5cm}
 
@@ -156,9 +156,9 @@ Se modifico el path de los archivos para ser leidos desde la ubicacion del
 testbench. Algunos nombres de señales fueron cambiados para mejorar la
 legibilidad del código.
 
-\subsubsection{Generador de Vectores make\_tb\_files.py}
+\subsubsection{Generador de Vectores tb\_vector\_gen.py}
 
-El script \texttt{make\_file.py} fue renombrado a \texttt{make\_tb\_files.py} y
+El script \texttt{make\_file.py} fue renombrado a \texttt{tb\_vector\_gen.py} y
 modificado para generar los archivos de entrada en la ubicacion del script.
 
 Se corrigio un error en la generacion del archivo \texttt{reset.out} que hacia
@@ -207,6 +207,174 @@ leds.
 
 \subsection{Implementación en FPGA}
 
+\subsubsection{Conexión remota a la placa y configuración de VIO e ILA}
+
+Una vez conectado remotamente a la placa mediante SSH, se realizó la
+configuración de los modulos VIO e ILA para poder controlar el modulo TOP y
+observar su comportamiento.
+
+El modulo VIO fue configurado para controlar las señales de entrada del modulo
+TOP, permitiendo cambiar los valores \texttt{select\_mux}, \texttt{vio\_reset}
+y \texttt{vio\_switch} desde la interfaz de usuario.
+
+El modulo ILA fue configurado para observar las señales de salida del modulo
+TOP, permitiendo capturar las waveforms de las señales \texttt{LED[3:0]}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../images/VIO_FPGA_Config.png}
+    \caption{Configuración del módulo VIO en la FPGA.}
+\end{figure}
+
+\subsubsection{Captura de waveforms con ILA}
+
+Se realizaron distintos escenarios de prueba utilizando el modulo VIO para
+cambiar los valores de entrada del modulo TOP y se capturaron las waveforms
+correspondientes con el modulo ILA.\@
+
+\textbf{Escenario 1: Immediate (Idle)}
+
+Se configuraron los valores de \texttt{select\_mux = 1}, \texttt{vio\_reset =
+    1} y \texttt{vio\_switch = 4'b1001}.
+
+ILA con trigger en modo immediate, capturando las señales de salida de los leds
+en el instante de captura.
+
+Se lograron capturar las siguientes waveforms:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../images/waveforms/immediate.png}
+    \caption{Captura de waveforms con ILA en estado immediate (Idle).}
+\end{figure}
+
+Como se puede observar, la señal capturada muestra el estado actual de los leds
+en el instante de la captura, ignorando el trigger seteado en el ILA.\@
+
+\textbf{Escenario 2: Desplazamiento Ciclico}
+
+Se configuraron los valores de \texttt{select\_mux = 1}, \texttt{vio\_reset =
+    0} y \texttt{vio\_switch = 4'b1001}. Habilitado, con velocidad \texttt{R0} y
+leds verdes activos.
+
+Debido al limitante de cantidad de muestras del ILA, se tuvieron que realizar
+varias capturas para poder observar el comportamiento completo del
+desplazamiento cíclico de los leds.
+
+Cambiando el valor del trigger del ILA:\@
+
+\begin{itemize}
+    \item Primera captura: \texttt{LED == 4'bXX1X}
+    \item Segunda captura: \texttt{LED == 4'bX1XX}
+    \item Tercera captura: \texttt{LED == 4'b1XXX}
+    \item Cuarta captura: \texttt{LED == 4'bXXX1}
+\end{itemize}
+
+Las capturas de waveforms obtenidas fueron las siguientes:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../images/waveforms/cyclic_shift_1.png}
+    \includegraphics[width=0.8\textwidth]{../images/waveforms/cyclic_shift_2.png}
+    \caption{Captura de waveforms con ILA en estado desplazamiento cíclico (1).}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../images/waveforms/cyclic_shift_3.png}
+    \includegraphics[width=0.8\textwidth]{../images/waveforms/cyclic_shift_4.png}
+    \caption{Captura de waveforms con ILA en estado desplazamiento cíclico (2).}
+\end{figure}
+
+Juntando las cuatro capturas, se puede observar el desplazamiento cíclico de
+los leds en el orden correcto, cumpliendo con el comportamiento esperado del
+modulo TOP.\@
+
+\textbf{Escenario 3: Control de Color de Leds}
+
+Se configuraron los valores de \texttt{select\_mux = 1}, \texttt{vio\_reset =
+    0} y \texttt{vio\_switch = 4'b1001}. Habilitado, con velocidad \texttt{R0} y
+leds verdes activos.
+
+Para comprobar el cambio de color de los leds, no se puede observar
+directamente en las waveforms ya que el ILA solo captura el estado de los leds
+generales LED, por eso hay que observar los cambios en VIO.\@
+
+Para observar el cambio de color se cambio el valor de \texttt{vio\_switch[3] =
+    0}, cambiando el color de los leds de verde a azul.
+
+Esto es observable en la siguiente captura de pantalla, donde se ve reflejado
+que leds estan activos mediante las flechas de actividad del VIO:\@
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../images/waveforms/vio_color_control_green.png}
+    \includegraphics[width=0.8\textwidth]{../images/waveforms/vio_color_control_blue.png}
+    \caption{Captura de los probes del VIO pasando de salida de leds verde a azul.}
+\end{figure}
+
+\textbf{Escenario 4: Inhabilitación de Contador}
+
+Se configuraron los valores de \texttt{select\_mux = 1}, \texttt{vio\_reset =
+    0} y \texttt{vio\_switch = 4'b1001}. Habilitado, con velocidad \texttt{R0} y
+leds verdes activos.
+
+Para comprobar esto se cambio el valor de \texttt{vio\_switch[0] = 0},
+inhabilitando el contador y manteniendo el valor de salida de los leds previo
+al cambio.
+
+Luego de ejecutar el trigger immediate se obtuvo la siguiente waveform:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../images/waveforms/not_init.png}
+    \caption{Captura de waveforms con ILA en estado inhabilitación de contador.}
+\end{figure}
+
+Este valor de salida en teoria esta manteniendose constante, para comprobar
+esto se cambia el valor del trigger del ILA a un valor distinto, por ejemplo
+\texttt{LED == 4'bX1XX} y se deberia observar que el trigger nunca se cumple,
+quedando en \texttt{waiting for trigger}.
+
+Como se predecia, el trigger nunca se cumple y el ILA queda en estado de
+espera:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../images/waveforms/not_init_waiting.png}
+    \caption{ILA en estado de espera.}
+\end{figure}
+
 \section{Conclusiones}
+
+A partir de los escenarios ensayados, se validó de manera exitosa el
+funcionamiento del módulo \texttt{TOP} sobre la FPGA utilizando un entorno de
+depuración remota. Mediante el módulo VIO se logró la inyección de estímulos
+virtuales interactivos, emulando con precisión la periferia de switches y
+botones físicos de la placa. Por el otro, el módulo ILA posibilitó la
+inspección temporal interna de señales de alta velocidad directas del reloj de
+100 MHz.
+
+El análisis de las waveforms obtenidas ratificó el correcto comportamiento
+secuencial del diseño. A pesar de la restricción en la profundidad de memoria
+del buffer del ILA (1024 muestras básicos), el uso estratégico de máscaras de
+bit con estados de indiferencia \texttt{X} permitió reconstruir secuencialmente
+el desplazamiento circular completo del registro en el orden correcto.
+Asimismo, las pruebas estáticas de inhabilitación mediante la señal
+\texttt{init} comprobaron empíricamente la retención de estado de los
+flip-flops, evidenciada por el bloqueo en estado \textit{Waiting for Trigger}
+del analizador lógico.
+
+Se verificó la correcta segregación de las herramientas de diagnóstico:
+mientras que los eventos de naturaleza secuencial y temporal dependientes del
+reloj fueron auditados con precisión mediante el ILA, la lógica puramente
+combinacional encargada del control de color del periférico (\texttt{G\_LED} y
+\texttt{B\_LED}) fue satisfactoriamente comprobada a nivel general mediante el
+monitoreo directo de \textit{probes} en el VIO Dashboard.
+
+Como balance final, el flujo completo de diseño y verificación (desde la
+generación de vectores de prueba en simulación hasta la ejecución e inspección
+en hardware real) demostró ser robusto, funcional y alineado con las
+especificaciones de diseño requeridas.
 
 \end{document}
