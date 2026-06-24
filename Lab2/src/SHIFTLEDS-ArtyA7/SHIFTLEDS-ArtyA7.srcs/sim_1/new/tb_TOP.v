@@ -14,9 +14,9 @@ module tb_TOP();
     reg [NB_SW-1:0] switch_tmp;
     reg reset_tmp;
 
-    integer fid_reset;
-    integer fid_switch;
-    integer code_error, code_error1;
+    // File-related variables
+    integer fid_reset, fid_switch;
+    integer error_reset, error_switch;
     integer ptr_switch;
 
     TOP #(.N_LEDS(N_LEDS), .NB_SEL(NB_SEL), .NB_COUNT(NB_COUNT), .NB_SW(NB_SW)) 
@@ -30,28 +30,31 @@ module tb_TOP();
     );
 
     initial begin
-        fid_reset = $fopen("reset.out", "r");
-        if (fid_reset == 0) $stop;
-        fid_switch = $fopen("switch.out", "r");
-        if (fid_switch == 0) $stop;
-
-        clk = 1'b0;
+        clk = 0;
+        forever #2.5 clk = ~clk; // 100MHz clock
     end
 
-    always #2.5 clk = ~clk;
+    initial begin
+        fid_reset = $fopen("../../../../../vectors/reset.out", "r");
+        if (fid_reset == 0) $stop;
+
+        fid_switch = $fopen("../../../../../vectors/switch.out", "r");
+        if (fid_switch == 0) $stop;
+    end
 
     always @(posedge clk) begin : loadFile
-        code_error <= $fscanf(fid_reset, "%d", reset_tmp);
-        if (code_error != 1) $stop;
+        error_reset <= $fscanf(fid_reset, "%d", reset_tmp);
+        if (error_reset != 1) $stop;
 
         for (ptr_switch = 0; ptr_switch < NB_SW; ptr_switch = ptr_switch + 1) begin
-            code_error1 <= $fscanf(fid_switch, "%d", switch_tmp[(ptr_switch + 1) - 1 -: 1]);
-            if (code_error1 != 1) $stop;
+            error_switch <= $fscanf(fid_switch, "%d", switch_tmp[(ptr_switch + 1) - 1 -: 1]);
+            if (error_switch != 1) $stop;
         end
 
         reset <= reset_tmp;
         switch <= switch_tmp;
-        $display("Reset: %d, Switch: %b", reset, switch);
+        $display("%d", reset);
+        $display("%d", switch);
     end
 
 endmodule
