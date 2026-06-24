@@ -8,3 +8,4 @@ Laboratorios desarrollados durante el curso de Diseño Digital en FPGA impartido
 ## Laboratorios
 
 - **Lab 1: Serial Interface (Python)** - [Ver INFORME](./Lab1/docs/Informe.pdf)
+- **Lab 2: Remote Debugging (Verilog)** - [Ver INFORME](./Lab2/docs/Informe.pdf)
