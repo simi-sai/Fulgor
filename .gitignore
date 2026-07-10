@@ -4,6 +4,10 @@
 
 # Python
 *__pycache__/
+*.pyc
+*.pyo
+*.py.orig
+*__init__.py
 
 # VIVADO
 *.cache
