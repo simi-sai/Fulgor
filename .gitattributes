@@ -3,3 +3,4 @@
 *.tcl linguist-detectable=false
 *.tex linguist-detectable=false
 *.pdf linguist-detectable=false
+*.ipynb linguist-detectable=false
