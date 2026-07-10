@@ -146,7 +146,7 @@ for i, (symbI, symbQ) in enumerate(symbols):
     plt.subplot(1, 3, i+1)
     plt.plot(symbI[100+offset:len(symbI)-(100-offset):os],
              symbQ[100+offset:len(symbQ)-(100-offset):os], '.', color='black')
-    plt.title(f'Constelación - β={beta[i]}')
+    plt.title(f'Constelación - $\\beta={beta[i]}$')
     plt.xlabel('I')
     plt.ylabel('Q')
     plt.grid(True)
@@ -208,7 +208,8 @@ for label_grupo, grupo in [('truncado', runs_trunc), ('redondeado', runs_round)]
             plt.plot(t, rc_q, color=colores_imp[j], linewidth=ancho,
                      linestyle='--', label=name)
 
-        plt.title(f'Respuesta al impulso {label_grupo} - β={beta[beta_idx]}')
+        plt.title(
+            f'Respuesta al impulso {label_grupo} - $\\beta={beta[beta_idx]}$')
         plt.xlabel('Tiempo')
         plt.ylabel('Amplitud')
         plt.grid(True)
@@ -260,7 +261,7 @@ for label_grupo, grupo in [('truncado', runs_trunc), ('redondeado', runs_round)]
         plt.legend(loc=3, fontsize=8)
         plt.grid(True)
         plt.title(
-            f'Respuesta en frecuencia {label_grupo} - β={beta[beta_idx]}')
+            f'Respuesta en frecuencia {label_grupo} - $\\beta={beta[beta_idx]}$')
         plt.xlim(F2[1], F2[-1])
         plt.xlabel('Frecuencia [Hz]')
         plt.ylabel('Magnitud [dB]')
@@ -310,7 +311,7 @@ for label_grupo, grupo in [('truncado', runs_trunc), ('redondeado', runs_round)]
         plt.xlim(1000, 1250)
         plt.grid(True)
         plt.legend(fontsize=8)
-        plt.title(f'Convolución I - {label_grupo} - β={beta[beta_idx]}')
+        plt.title(f'Convolución I - {label_grupo} - $\\beta={beta[beta_idx]}$')
         plt.ylabel('Magnitud')
 
         plt.subplot(2, 1, 2)
@@ -326,7 +327,7 @@ for label_grupo, grupo in [('truncado', runs_trunc), ('redondeado', runs_round)]
         plt.xlim(1000, 1250)
         plt.grid(True)
         plt.legend(fontsize=8)
-        plt.title(f'Convolución Q - {label_grupo} - β={beta[beta_idx]}')
+        plt.title(f'Convolución Q - {label_grupo} - $\\beta={beta[beta_idx]}$')
         plt.xlabel('Muestras')
         plt.ylabel('Magnitud')
 
@@ -414,7 +415,8 @@ for grupo_nombre, grupo in [('truncado', runs_trunc), ('redondeado', runs_round)
         axs[1, 1].set_aspect('equal')
         axs[1, 1].grid(True)
 
-        plt.suptitle(f'Constelación {grupo_nombre} - β={beta[beta_idx]}')
+        plt.suptitle(
+            f'Constelación {grupo_nombre} - $\\beta={beta[beta_idx]}$')
         plt.tight_layout()
         plt.savefig(
             f"../images/cuantizaciones/constelacion_{grupo_nombre}_beta{beta_idx}.png")
